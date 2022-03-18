@@ -1,0 +1,27 @@
+# 配置文件模板
+service:
+  name: 服务名称
+  image: 镜像名称
+  port: 8080
+  registry:
+    ip: 1.1.1.1
+    port: 80
+experiment:
+  name: 实验1
+  node: Node  # pod 的运行节点
+  namespace: test  # 命名空间
+  resource:  # pod 的资源限制
+    cpu:
+      start: 100
+      end: 1000
+      step: 100
+    ram:
+      start: 100
+      end: 1000
+      step: 100
+  user:  # 模拟的用户数量
+    start: 100
+    end: 1000
+    step: 100
+  data: 文件夹路径  # 子文件夹为 API 请求路径，模拟用户请求时从中随机读取数据作为请求体
+debug: true  # 开启则不加载及执行 pod 部署操作
