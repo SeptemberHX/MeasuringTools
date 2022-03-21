@@ -14,14 +14,20 @@ from kubernetes import client, config
 
 from k8s import create_pod_from_config
 
+from users import user_demands
+
 
 def process_fix_resource(exp_config, cpu, ram):
     # 1. 创建 pod
     pod_id = create_pod_from_config(exp_config=exp_config, cpu=cpu, ram=ram, c=config)
 
+    for user_num in range(exp_config['experiment']['user']['start'],
+                     exp_config['experiment']['user']['end'],
+                     exp_config['experiment']['user']['step']):
     # 2. todo: 资源监控
 
     # 3. todo: 用户模拟请求
+        user_demands(exp_config, user_num)
     pass
 
 
