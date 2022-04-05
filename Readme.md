@@ -38,3 +38,4 @@ pip3 install --no-cache-dir -r requirements.txt
 kubectl apply -f ./resource/metrics-erver/metrics-server.yaml
 #kubectl delete ./resource/metrics-erver/metrics-server.yaml
 ~~~
+这里通过shell指令获取 某一命名空间下的pod的资源消耗
