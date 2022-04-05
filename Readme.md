@@ -20,3 +20,21 @@ pip3 install coloredlogs kubernetes
 结果按照**配置文件**中**result**进行配置：
 1. 结果文件将保存在在result文件夹下，文件将命名为 _实验名-用户数_。
 2. 结果的格式为（用户id，[(发起时间，响应时间，成功/失败)···]）
+
+
+
+
+## metrics-server
+安装需要的依赖
+~~~shell script
+pip3 install --no-cache-dir -r requirements.txt
+~~~
+获取信息为
+
+![](./resource/metrics-server/cpuandmem.png)
+
+其中CPU(cores)表示核数， `1核 = 1000m`
+~~~shell script
+kubectl apply -f ./resource/metrics-erver/metrics-server.yaml
+#kubectl delete ./resource/metrics-erver/metrics-server.yaml
+~~~

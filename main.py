@@ -15,19 +15,26 @@ from kubernetes import client, config
 from k8s import create_pod_from_config
 
 from users import user_demands
-
+import multiprocessing
+from metrics import detectCpuAndMemById
 
 def process_fix_resource(exp_config, cpu, ram):
     # 1. 创建 pod
     pod_id = create_pod_from_config(exp_config=exp_config, cpu=cpu, ram=ram, c=config)
 
+    # 2. todo: 资源监控
+    podList = []
+    podList.append(pod_id)
+    pool = multiprocessing.Pool(processes=len(podList))
+    for i in range(2):
+        res = pool.apply_async(detectCpuAndMemById, args=["wer", i])
+    pool.close()
+    # 3. todo: 用户模拟请求
     for user_num in range(exp_config['experiment']['user']['start'],
                      exp_config['experiment']['user']['end'],
                      exp_config['experiment']['user']['step']):
-    # 2. todo: 资源监控
-
-    # 3. todo: 用户模拟请求
         user_demands(exp_config, user_num)
+    pool.terminate()
     pass
 
 
