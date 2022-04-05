@@ -40,7 +40,7 @@ def detectCpuAndMemById(exp_config, pod_id):
         with open(filename, "a+", newline='') as f:
             writer = csv.writer(f)
             writer.writerow([str(now_date), cpu, mem])
-        time.sleep(5)
+        time.sleep(15)
 
 if __name__ == '__main__':
 
