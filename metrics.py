@@ -21,7 +21,10 @@ def toDetect(exp_config, podList, pool):
         res = pool.apply_async(detectCpuAndMemById, args=[exp_config, pod_id])
     pool.close()
 
-
+def toDetect1(exp_config, podList, pool):
+    for pod_id in podList:
+        res = pool.apply_async(detectCpuAndMemByPodId, args=[exp_config, pod_id])
+    pool.close()
 
 def detectCpuAndMemById(exp_config, pod_id):
     print("pod_id :" + str(pod_id))
@@ -41,6 +44,30 @@ def detectCpuAndMemById(exp_config, pod_id):
             writer = csv.writer(f)
             writer.writerow([str(now_date), cpu, mem])
         time.sleep(15)
+
+def detectCpuAndMemByPodId(exp_config, pod_id):
+    shell = 'kubectl describe pods  ' + str(pod_id)   + " | grep Container | grep docker"
+    filename = exp_config['experiment']['metrics-data'] + str(pod_id) + ".csv"
+    res = os.popen(shell).readlines()
+    h = re.sub(' +', " ", res[0].strip('\n')).strip()
+    contrainerid = h.split("//")[1]
+    with open(filename, "a+", newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(["date", "cpuUseage", "mem", 'memlimit'])
+    while True:
+        res = os.popen("docker stats " + str(contrainerid) + " --no-stream").readlines()
+        h = re.sub(' +', " ", res[1].strip('\n'))
+        result = h.split(" ")
+        print(result)
+        cpuUseage = result[2]
+        mem = result[3]
+        memlimit = result[5]
+        now_date = datetime.datetime.now()
+        with open(filename, "a+", newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow([str(now_date), cpuUseage, mem, memlimit])
+        time.sleep(1)
+
 
 # if __name__ == '__main__':
 #
@@ -62,33 +89,6 @@ def detectCpuAndMemById(exp_config, pod_id):
 #
 #     # 关掉线程
 #     pool.terminate()
-
-
-
-
-def detectCpuAndMemByPodId( pod_id):
-    shell = 'kubectl describe pods  ' + str(pod_id)   + " | grep Container | grep docker"
-    res = os.popen(shell).readlines()
-    h = re.sub(' +', " ", res[0].strip('\n')).strip()
-    contrainerid = h.split("//")[1]
-    filename = "./" + str(pod_id) + ".csv"
-    with open(filename, "a+", newline='') as f:
-        writer = csv.writer(f)
-        writer.writerow(["date", "cpuUseage", "mem", 'memlimit'])
-    while True:
-        res = os.popen("docker stats " + str(contrainerid) + " --no-stream").readlines()
-        h = re.sub(' +', " ", res[1].strip('\n'))
-        result = h.split(" ")
-        print(result)
-        cpuUseage = result[2]
-        mem = result[3]
-        memlimit = result[5]
-        now_date = datetime.datetime.now()
-        with open(filename, "a+", newline='') as f:
-            writer = csv.writer(f)
-            writer.writerow([str(now_date), cpuUseage, mem, memlimit])
-        time.sleep(1)
-
 
 if __name__ == '__main__':
     detectCpuAndMemByPodId("basicuser-service-68f84d498f-qrl92")
