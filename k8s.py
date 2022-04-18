@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 """
-@Project ：ExpTool 
+@Project ：ExpTool
 @File ：k8s.py
 @Author ：septemberhx
 @Date ：2022/3/18
@@ -16,71 +16,85 @@ import yaml
 
 from kubernetes import client, config
 
-
-def create_namespace_if_not_exist(namespace, c: client):
-    v1 = client.CoreV1Api()
-    for ns in v1.list_namespace().items:
-        if ns.metadata.name == namespace:
-            return
-    v1.create_namespace({
-        'apiVersion': 'v1',
-        'kind': 'Namespace',
-        'metadata': {
-            'name': namespace
-        }
-    })
+class K8S:
+    def __init__(self, configpath="/root/.kube/config"):
+        config.load_kube_config(config_file=configpath)
+        self.core_api = client.CoreV1Api() # namespace,pod,service,pv,pvc
+        self.apps_api = client.AppsV1Api() # deployment
 
 
-def create_pod_on_node(name, image, node_selector_value, registry_ip, registry_port, namespace, cpu, ram, c: client, debug):
-    '''
-    指定节点上部署给定服务的一个 pod
-    :param registry_port: 注册中心 port
-    :param registry_ip: 注册中心 IP
-    :param name: 服务名称
-    :param image: 镜像路径
-    :param node_selector_value: k8s 的每个节点会带有 node=XXX 标签，这里是指定节点的标签值
-    :param namespace: 命名空间
-    :param c: k8s api client object
-    :return: pod id
-    '''
-    with open('./resource/pod.yaml') as f:
-        dep = yaml.safe_load(f)
-        dep['spec']['containers'][0]['name'] = name
-        dep['spec']['containers'][0]['image'] = image
-        dep['spec']['containers'][0]['env'][0]['value'] = registry_ip
-        dep['spec']['containers'][0]['env'][1]['value'] = registry_port
-        dep['spec']['nodeSelector']['node'] = node_selector_value
-        dep['metadata']['name'] = f'{name}-{datetime.now().timestamp()}'
-        dep['spec']['containers'][0]['resources']['limits']['cpu'] = cpu
-        dep['spec']['containers'][0]['resources']['limits']['memory'] = ram
-        dep['spec']['containers'][0]['resources']['requests']['cpu'] = cpu
-        dep['spec']['containers'][0]['resources']['requests']['memory'] = ram
+    def create_namespace_if_not_exist(self, namespace):
+        for ns in self.core_api.list_namespace().items:
+            if ns.metadata.name == namespace:
+                return
+        self.core_api.create_namespace({
+            'apiVersion': 'v1',
+            'kind': 'Namespace',
+            'metadata': {
+                'name': namespace
+            }
+        })
 
-        print(dep)
+    def create_pod_on_node(self, name, image, node_selector_value, envs, namespace, cpu, ram, debug):
+        '''
+                指定节点上部署给定服务的一个 pod
+                :param registry_port: 注册中心 port
+                :param registry_ip: 注册中心 IP
+                :param name: 服务名称
+                :param image: 镜像路径
+                :param node_selector_value: k8s 的每个节点会带有 node=XXX 标签，这里是指定节点的标签值
+                :param namespace: 命名空间
+                :param c: k8s api client object
+                :return: pod id
+                '''
+        with open('./resource/pod.yaml') as f:
+            dep = yaml.safe_load(f)
+            dep['spec']['containers'][0]['name'] = name
+            dep['spec']['containers'][0]['image'] = image
+            dep['spec']['containers'][0]['env'] = envs
+            dep['spec']['nodeSelector']['node'] = node_selector_value
+            dep['metadata']['name'] = f'{name}-{datetime.now().timestamp()}'
+            # dep['spec']['containers'][0]['resources']['limits']['cpu'] = cpu
+            # dep['spec']['containers'][0]['resources']['limits']['memory'] = ram
+            # dep['spec']['containers'][0]['resources']['requests']['cpu'] = cpu
+            # dep['spec']['containers'][0]['resources']['requests']['memory'] = ram
 
-        if not debug:
-            create_namespace_if_not_exist(namespace, client)
-            k8s_apps_v1 = c.CoreV1Api()
-            k8s_apps_v1.create_namespaced_pod(body=dep, namespace=namespace)
-        return dep['metadata']['name']
+            print(dep)
+
+            if not debug:
+                self.create_namespace_if_not_exist(namespace)
+                result = self.core_api.create_namespaced_pod(body=dep, namespace=namespace)
+                print("------------------")
+                print(result)
+            return dep['metadata']['name']
+
+    def create_pod_from_config(self, exp_config, cpu, ram):
+        '''
+                从实验的配置文件创建 pod
+                todo: 决定资源的 limits 空间，默认是 requests 给定这么多资源，但是可能会超过，所以也要限制 limits
+                :param ram: ram 限制
+                :param cpu: cpu 限制
+                :param exp_config:
+                :param c:
+                :return:
+                '''
+        name = exp_config['service']['name']
+        image = exp_config['service']['image']
+        node = exp_config['experiment']['node']
+        env = exp_config['service']['env']
+        envs =[]
+        for i in env:
+            envs.append({'name': i, 'value': str(env[i])})
+        namespace = exp_config['experiment']['namespace']
+
+        return self.create_pod_on_node(name, image, node, envs,
+                                       namespace, cpu=cpu, ram=ram, debug=exp_config['debug'])
 
 
-def create_pod_from_config(exp_config, cpu, ram, c: client):
-    '''
-    从实验的配置文件创建 pod
-    todo: 决定资源的 limits 空间，默认是 requests 给定这么多资源，但是可能会超过，所以也要限制 limits
-    :param ram: ram 限制
-    :param cpu: cpu 限制
-    :param exp_config:
-    :param c:
-    :return:
-    '''
-    name = exp_config['service']['name']
-    image = exp_config['service']['image']
-    node = exp_config['experiment']['node']
-    registry_ip = exp_config['service']['registry']['ip']
-    registry_port = exp_config['service']['registry']['port']
-    namespace = exp_config['experiment']['namespace']
 
-    return create_pod_on_node(name, image, node, registry_ip, registry_port,
-                              namespace, cpu=cpu, ram=ram, c=c, debug=exp_config['debug'])
+if __name__ == '__main__':
+    with open("./resource/config-template-demo.yaml") as f:
+        exp_config = yaml.safe_load(f)
+        config_path = exp_config['kube_config']
+        k8scontroller = K8S(config_path)
+        k8scontroller.create_pod_from_config(exp_config, 100, 500)

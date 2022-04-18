@@ -10,8 +10,6 @@
 """
 
 import yaml
-from kubernetes import client, config
-
 from k8s import create_pod_from_config
 
 from users import user_demands
@@ -21,7 +19,7 @@ from metrics import detectCpuAndMemByPodId
 
 def process_fix_resource(exp_config, cpu, ram):
     # 1. 创建 pod
-    pod_id = create_pod_from_config(exp_config=exp_config, cpu=cpu, ram=ram, c=config)
+    pod_id = create_pod_from_config(exp_config=exp_config, cpu=cpu, ram=ram)
 
     # 2. todo: 资源监控
     podList = []

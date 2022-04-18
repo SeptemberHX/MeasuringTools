@@ -29,7 +29,7 @@ def toDetect1(exp_config, podList, pool):
 def detectCpuAndMemById(exp_config, pod_id):
     print("pod_id :" + str(pod_id))
     namespace = exp_config['experiment']['namespace']
-    filename =  exp_config['experiment']['metrics-data'] + str(pod_id) +".csv"
+    filename =  exp_config['experiment']['performance-data'] + str(pod_id) +".csv"
     with open(filename, "a+", newline='') as f:
         writer = csv.writer(f)
         writer.writerow(["date","cpu","mem"])
@@ -47,7 +47,7 @@ def detectCpuAndMemById(exp_config, pod_id):
 
 def detectCpuAndMemByPodId(exp_config, pod_id):
     shell = 'kubectl describe pods  ' + str(pod_id)   + " | grep Container | grep docker"
-    filename = exp_config['experiment']['metrics-data'] + str(pod_id) + ".csv"
+    filename = exp_config['experiment']['performance-data'] + str(pod_id) + ".csv"
     res = os.popen(shell).readlines()
     h = re.sub(' +', " ", res[0].strip('\n')).strip()
     contrainerid = h.split("//")[1]
