@@ -54,10 +54,10 @@ class K8S:
             dep['spec']['containers'][0]['env'] = envs
             dep['spec']['nodeSelector']['node'] = node_selector_value
             dep['metadata']['name'] = f'{name}-{datetime.now().timestamp()}'
-            # dep['spec']['containers'][0]['resources']['limits']['cpu'] = cpu
-            # dep['spec']['containers'][0]['resources']['limits']['memory'] = ram
-            # dep['spec']['containers'][0]['resources']['requests']['cpu'] = cpu
-            # dep['spec']['containers'][0]['resources']['requests']['memory'] = ram
+            dep['spec']['containers'][0]['resources']['limits']['cpu'] = cpu
+            dep['spec']['containers'][0]['resources']['limits']['memory'] = ram
+            dep['spec']['containers'][0]['resources']['requests']['cpu'] = cpu
+            dep['spec']['containers'][0]['resources']['requests']['memory'] = ram
 
             print(dep)
 
