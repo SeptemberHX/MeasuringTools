@@ -1,0 +1,169 @@
+# 部署数据库和 eureka注册中心
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eureka-server
+spec:
+  selector:
+    matchLabels:
+      app: eureka-server
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: eureka-server
+    spec:
+      containers:
+      - name: eureka-server
+        image: 192.168.1.104:5000/eurekaserver
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+        resources:
+          requests:
+            # cpu: 50m
+            memory: 100Mi
+          limits:
+            # cpu: 200m
+            memory: 500Mi
+      nodeSelector:
+        node: k8s-master 
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: eureka-server
+spec:
+  ports:
+    - name: http
+      port: 8000
+  selector:
+   app: eureka-server
+---
+#部署数据库
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notionserviceserver-mysql
+spec:
+  selector:
+    matchLabels:
+      app: notionserviceserver-mysql
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: notionserviceserver-mysql
+    spec:
+      containers:
+      - name: notionserviceserver-mysql
+        image: mysql:8.0.25
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: root
+        ports:
+        - containerPort: 3306
+        resources:
+          requests:
+            cpu: 50m
+            memory: 100Mi
+      nodeSelector:
+        node: k8s-master 
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notionserviceserver-mysql
+spec:
+  ports:
+    - port: 3306
+  selector:
+   app: notionserviceserver-mysql
+
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: medicalguidance-mysql
+spec:
+  selector:
+    matchLabels:
+      app: medicalguidance-mysql
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: medicalguidance-mysql
+    spec:
+      containers:
+      - name: medicalguidance-mysql
+        image: mysql:8.0.25
+        imagePullPolicy: IfNotPresent
+        env:
+        # Use secret in real usage
+        - name: MYSQL_ROOT_PASSWORD
+          value: root
+        ports:
+        - containerPort: 3306
+        resources:
+          requests:
+            cpu: 50m
+            memory: 100Mi
+      nodeSelector:
+        node: k8s-master 
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: medicalguidance-mysql
+spec:
+  ports:
+    - port: 3306
+  selector:
+   app: medicalguidance-mysql
+
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: basic-user-mysql
+spec:
+  selector:
+    matchLabels:
+      app: basic-user-mysql
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: basic-user-mysql
+    spec:
+      containers:
+      - name: basic-user-mysql
+        image: mysql:8.0.25
+        imagePullPolicy: IfNotPresent
+        env:
+        # Use secret in real usage
+        - name: MYSQL_ROOT_PASSWORD
+          value: root
+        ports:
+        - containerPort: 3306
+        resources:
+          requests:
+            cpu: 50m
+            memory: 100Mi
+      nodeSelector:
+        node: k8s-master 
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: basic-user-mysql
+spec:
+  ports:
+    - port: 3306
+  selector:
+   app: basic-user-mysql
