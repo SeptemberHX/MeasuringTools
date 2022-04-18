@@ -84,3 +84,9 @@ def create_pod_from_config(exp_config, cpu, ram, c: client):
 
     return create_pod_on_node(name, image, node, registry_ip, registry_port,
                               namespace, cpu=cpu, ram=ram, c=c, debug=exp_config['debug'])
+
+
+def get_pod_ip(pod_name, namespace):
+    v1 = client.CoreV1Api()
+    ret = v1.read_namespaced_pod(name=pod_name, namespace=namespace)
+    return ret.status.pod_ip

@@ -5,7 +5,7 @@ import yaml
 
 
 # todo: 根据pod的访问路径调整ip
-base_urls = "http://127.0.0.1:8087"
+base_urls = "http://127.0.0.1"
 
 
 class MyThread(threading.Thread):
@@ -63,7 +63,8 @@ def analyze(exp_config):
     return request_url, params
 
 
-def user_demands(exp_config, user_num):
+def user_demands(exp_config, user_num, url):
+    base_urls = url
     ex_threads = []
     file_name = exp_config['experiment']['result']+"/"+exp_config['experiment']['name']+"-"+str(user_num)
     request_url, params = analyze(exp_config)

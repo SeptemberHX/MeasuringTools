@@ -12,6 +12,7 @@
 import yaml
 from kubernetes import client, config
 
+import k8s
 from k8s import create_pod_from_config
 
 from users import user_demands
@@ -32,10 +33,11 @@ def process_fix_resource(exp_config, cpu, ram):
         # res = pool.apply_async(detectCpuAndMemByPodId, args=[exp_config, i])
     pool.close()
     # 3. todo: 用户模拟请求
+    url = k8s.get_pod_ip(pod_id,exp_config['experiment']['namespace'])
     for user_num in range(exp_config['experiment']['user']['start'],
                      exp_config['experiment']['user']['end'],
                      exp_config['experiment']['user']['step']):
-        user_demands(exp_config, user_num)
+        user_demands(exp_config, user_num, url+':8080')
     # 收集 性能线程终止
     pool.terminate()
     pass
