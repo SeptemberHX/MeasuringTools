@@ -9,7 +9,7 @@ service:
 experiment:
   name: 实验1
   node: Node  # pod 的运行节点
-  namespace: test  # 命名空间
+  namespace: default  # 命名空间
   resource:  # pod 的资源限制
     cpu:
       start: 100
@@ -23,5 +23,8 @@ experiment:
     start: 100
     end: 1000
     step: 100
-  data: 文件夹路径  # 子文件夹为 API 请求路径，模拟用户请求时从中随机读取数据作为请求体
+    time: 150 # 用户请求时间，单位为s
+  data: data  # 子文件夹为 API 请求路径，模拟用户请求时从中随机读取数据作为请求体，子文件格式为.json，一个请求数据对应一个json文件
+  result: result # 实验结果存放路径，用户请求的结果文件为result/ex_name-user_num
+  metrics-data: result
 debug: true  # 开启则不加载及执行 pod 部署操作
