@@ -13,12 +13,12 @@ from datetime import datetime
 from typing import Dict
 
 import yaml
-
 from kubernetes import client, config
 
+
 class K8S:
-    def __init__(self, configpath="/root/.kube/config"):
-        config.load_kube_config(config_file=configpath)
+    def __init__(self):
+        config.load_kube_config()
         self.core_api = client.CoreV1Api() # namespace,pod,service,pv,pvc
         self.apps_api = client.AppsV1Api() # deployment
 
@@ -99,8 +99,7 @@ class K8S:
 if __name__ == '__main__':
     with open("./resource/config-template-demo.yaml") as f:
         exp_config = yaml.safe_load(f)
-        config_path = exp_config['kube_config']
-        k8scontroller = K8S(config_path)
+        k8scontroller = K8S()
         k8scontroller.create_pod_from_config(exp_config, 100, 500)
 
 

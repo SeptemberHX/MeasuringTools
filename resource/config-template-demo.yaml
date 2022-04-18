@@ -1,5 +1,4 @@
 # 配置文件模板
-kube_config: /home/liulei/.kube/config  # 自己实验时 记得配置以下
 service:
   name: basicuser
   image: 192.168.1.102:5000/mss/basicuser
@@ -28,5 +27,5 @@ experiment:
     time: 150 # 用户请求时间，单位为s
   data: data  # 子文件夹为 API 请求路径，模拟用户请求时从中随机读取数据作为请求体，子文件格式为.json，一个请求数据对应一个json文件
   result: result # 实验结果存放路径，用户请求的结果文件为result/ex_name-user_num
-  performance-data: ./
+  performance-data: ./performancedata/
 debug: false  # 开启则不加载及执行 pod 部署操作

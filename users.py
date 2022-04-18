@@ -48,6 +48,7 @@ def request(urls, request_body, request_time):
     return threading.currentThread().user_id, result
 
 
+# 获取请求信息？
 def analyze(exp_config):
     request_url = []
     params = []
