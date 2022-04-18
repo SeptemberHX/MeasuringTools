@@ -91,6 +91,10 @@ class K8S:
                                        namespace, cpu=cpu, ram=ram, debug=exp_config['debug'])
 
 
+    def get_pod_ip(self, pod_name, namespace):
+        ret = self.core_api.read_namespaced_pod(name=pod_name, namespace=namespace)
+        return ret.status.pod_ip
+
 
 if __name__ == '__main__':
     with open("./resource/config-template-demo.yaml") as f:
@@ -98,3 +102,6 @@ if __name__ == '__main__':
         config_path = exp_config['kube_config']
         k8scontroller = K8S(config_path)
         k8scontroller.create_pod_from_config(exp_config, 100, 500)
+
+
+

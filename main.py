@@ -10,7 +10,8 @@
 """
 
 import yaml
-from k8s import create_pod_from_config
+from k8s import K8S
+
 
 from users import user_demands
 import multiprocessing
@@ -18,8 +19,10 @@ from metrics import detectCpuAndMemById
 from metrics import detectCpuAndMemByPodId
 
 def process_fix_resource(exp_config, cpu, ram):
+    k8scontroller = K8S(exp_config['kube_config'])
+
     # 1. 创建 pod
-    pod_id = create_pod_from_config(exp_config=exp_config, cpu=cpu, ram=ram)
+    pod_id = k8scontroller.create_pod_from_config(exp_config=exp_config, cpu=cpu, ram=ram)
 
     # 2. todo: 资源监控
     podList = []
@@ -30,10 +33,11 @@ def process_fix_resource(exp_config, cpu, ram):
         # res = pool.apply_async(detectCpuAndMemByPodId, args=[exp_config, i])
     pool.close()
     # 3. todo: 用户模拟请求
+    url = k8scontroller.get_pod_ip(pod_id,exp_config['experiment']['namespace'])
     for user_num in range(exp_config['experiment']['user']['start'],
                      exp_config['experiment']['user']['end'],
                      exp_config['experiment']['user']['step']):
-        user_demands(exp_config, user_num)
+        user_demands(exp_config, user_num, url+':8080')
     # 收集 性能线程终止
     pool.terminate()
     pass
@@ -44,8 +48,9 @@ def experiment_process(config_file_path):
         exp_config = yaml.safe_load(f)
         print(exp_config)
 
-        if not exp_config['debug']:
-            config.load_kube_config()
+
+        # if not exp_config['debug']:
+        #     config.load_kube_config()
 
         for cpu in range(exp_config['experiment']['resource']['cpu']['start'],
                          exp_config['experiment']['resource']['cpu']['end'],
