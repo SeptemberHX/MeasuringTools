@@ -59,7 +59,7 @@ def detectCpuAndMemByPodId(exp_config, pod_id):
         h = re.sub(' +', " ", res[1].strip('\n'))
         result = h.split(" ")
         print(result)
-        cpuUseage = round(float(result[2].replace("%","")), 4) * 10
+        cpuUseage = round(float(result[2].replace("%",""))* 10 , 4)
         mem = result[3]
         memlimit = result[5]
         now_date = datetime.datetime.now()
