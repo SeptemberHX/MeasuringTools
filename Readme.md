@@ -54,6 +54,7 @@ kubectl apply -f ./resource/metrics-erver/metrics-server.yaml
 ## users
 ### 用户请求
 生成数据脚本可以写在productData中， 最后生成的是json的数组，并放到相应的文件中
+user中的analyze方法是解析请求的方法，
 ~~~json
 [
   {
@@ -67,6 +68,8 @@ kubectl apply -f ./resource/metrics-erver/metrics-server.yaml
 
     ]
   },{ % 第二个请求的接口信息
+    "urlpath": "user/get", % 接口
+    "needparam" : False,    % 没有参数的话，analyze会生成20个空参json，以用来请求
   
   }
 ]
