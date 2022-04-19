@@ -51,9 +51,10 @@ def detectCpuAndMemByPodId(exp_config, pod_id):
         writer.writerow(["date", "cpu/m", "mem", 'memlimit'])
         f.close()
     print("wirte")
+    docker_container_id = k8scon.get_pod_docker_id(pod_id)
+    print("docker contrainer id: " + docker_container_id)
     while True:
         try:
-            docker_container_id = k8scon.get_pod_docker_id(pod_id)
             res = os.popen("docker stats " + str(docker_container_id) + " --no-stream").readlines()
             h = re.sub(' +', " ", res[1].strip('\n'))
             result = h.split(" ")
@@ -68,6 +69,8 @@ def detectCpuAndMemByPodId(exp_config, pod_id):
         except Exception as e:
             print(e)
             time.sleep(1)
+            docker_container_id = k8scon.get_pod_docker_id(pod_id)
+            print("new docker container id : " + docker_container_id)
             continue
 
 # if __name__ == '__main__':
