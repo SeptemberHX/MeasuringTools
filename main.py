@@ -68,6 +68,6 @@ def experiment_process(config_file_path):
 
 if __name__ == '__main__':
     # experiment_process('./resource/config-template.yaml')
-    with open('./resource/config-template-demo.yaml') as f:
+    with open('resource/demo/basicuser/config-template-demo.yaml') as f:
         exp_config = yaml.safe_load(f)
         process_fix_resource(exp_config, 100, 500)
