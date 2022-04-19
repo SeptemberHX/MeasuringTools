@@ -56,8 +56,9 @@ class K8S:
             dep['metadata']['name'] = f'{name}-{datetime.now().timestamp()}'
             dep['spec']['containers'][0]['resources']['limits']['cpu'] = str(cpu) + "m"
             dep['spec']['containers'][0]['resources']['limits']['memory'] = str(ram) + "Mi"
-            dep['spec']['containers'][0]['resources']['requests']['cpu'] = str(cpu) + "m"
-            dep['spec']['containers'][0]['resources']['requests']['memory'] = str(ram) +"Mi"
+            dep['spec']['containers'][0]['resources']['requests']['cpu'] = str(cpu/5) + "m"
+            dep['spec']['containers'][0]['resources']['requests']['memory'] = str(ram/5) +"Mi"
+
             print(dep)
 
             if not debug:
@@ -97,13 +98,16 @@ class K8S:
         ret = self.core_api.read_namespaced_pod(name=pod_name, namespace=namespace)
         return str(ret.status.container_statuses[0].container_id).split("//")[1]
 
+    def delete_pod(self,pod_id, namespace="default"):
+        self.core_api.delete_namespaced_pod(pod_id,namespace )
+
 
 if __name__ == '__main__':
     with open("resource/demo/config-template-demo.yaml") as f:
         exp_config = yaml.safe_load(f)
         k8scontroller = K8S()
-        k8scontroller.create_pod_from_config(exp_config, 100, 500)
-        print(k8scontroller.get_pod_docker_id("basicuser-1650366496.760966"))
+        # k8scontroller.create_pod_from_config(exp_config, 100, 500)
+        k8scontroller.delete_pod("basicuser-1650376338.320011")
 
 
 

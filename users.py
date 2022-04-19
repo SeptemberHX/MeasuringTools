@@ -82,10 +82,10 @@ def analyze(exp_config):
             params.append(param)
     return request_url, params
 
-def user_demands(exp_config, user_num, url):
+def user_demands(exp_config, user_num, url, pod_id):
     base_urls = "http://" + url
     ex_threads = []
-    path = exp_config['experiment']['result']
+    path = exp_config['experiment']['result'] + "/" + pod_id
     if not os.path.exists(path):
         os.makedirs(path)
     file_name = path +"/"+exp_config['experiment']['name']+"-"+str(user_num)

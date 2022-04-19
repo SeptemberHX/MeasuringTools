@@ -24,8 +24,12 @@ def process_fix_resource(exp_config, cpu, ram):
     # 1. 创建 pod
     pod_id = k8scontroller.create_pod_from_config(exp_config=exp_config, cpu=cpu, ram=ram)
 
-    #
+
     time.sleep(10)  # 这里是等待pod 准备一下， 具体多少时间也不清楚
+    # TODO
+    #是否需要再等一下， 等待pod稳定
+
+
     # 2. todo: 资源监控
     print(" begin monitor")
     podList = []
@@ -39,11 +43,14 @@ def process_fix_resource(exp_config, cpu, ram):
     for user_num in range(exp_config['experiment']['user']['start'],
                      exp_config['experiment']['user']['end'],
                      exp_config['experiment']['user']['step']):
-        user_demands(exp_config, user_num, str(url)+':8080')
+        user_demands(exp_config, user_num, str(url)+':8080', pod_id)
 
 
     print("end monitor")
     pool.terminate() # 收集 性能线程终止
+
+
+    k8scontroller.delete_pod(pod_id)
     pass
 
 
@@ -63,6 +70,7 @@ def experiment_process(config_file_path):
                              exp_config['experiment']['resource']['ram']['end'],
                              exp_config['experiment']['resource']['ram']['step']):
                 process_fix_resource(exp_config, cpu, ram)
+        process_fix_resource(exp_config, 500, 500)
 
 
 if __name__ == '__main__':
