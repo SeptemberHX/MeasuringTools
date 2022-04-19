@@ -97,7 +97,7 @@ class K8S:
 
 
 if __name__ == '__main__':
-    with open("./resource/config-template-demo.yaml") as f:
+    with open("resource/demo/basicuser/config-template-demo.yaml") as f:
         exp_config = yaml.safe_load(f)
         k8scontroller = K8S()
         k8scontroller.create_pod_from_config(exp_config, 100, 500)
