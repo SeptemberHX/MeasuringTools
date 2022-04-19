@@ -1,8 +1,10 @@
-import json
+#!/usr/bin/env python
+
+
 import random
 import time, threading, requests, os
 import yaml
-
+import ast
 
 # todo: 根据pod的访问路径调整ip
 base_urls = "http://127.0.0.1"
@@ -49,31 +51,50 @@ def request(urls, request_body, request_time):
 
 
 # 获取请求信息？
+# def analyze(exp_config):
+#     request_url = []
+#     params = []
+#     for root, dirs, files in os.walk(exp_config['experiment']['data']):
+#         if len(files) > 0:
+#             param = []
+#             request_url.append(root.replace('\\', '/').replace(exp_config['experiment']['data'], ""))
+#             for f in files:
+#                 with open(root + '\\' + f, 'r') as load_f:
+#                     load_dict = json.load(load_f)
+#                 param.append(load_dict)
+#             params.append(param)
+#     return request_url, params
 def analyze(exp_config):
     request_url = []
     params = []
-    for root, dirs, files in os.walk(exp_config['experiment']['data']):
-        if len(files) > 0:
+    filepath = exp_config['experiment']['data']
+    f = open(filepath, 'r')
+    data = ast.literal_eval(f.read())
+    for eachJson in data:
+        request_url.append(eachJson['urlpath'])
+        if eachJson['needparam']:
+            param = eachJson['param']
+            params.append(param)
+        else:
             param = []
-            request_url.append(root.replace('\\', '/').replace(exp_config['experiment']['data'], ""))
-            for f in files:
-                with open(root + '\\' + f, 'r') as load_f:
-                    load_dict = json.load(load_f)
-                param.append(load_dict)
+            for i in range(10):
+                param.append({})
             params.append(param)
     return request_url, params
 
-
 def user_demands(exp_config, user_num, url):
-    base_urls = url
+    base_urls = "http://" + url
     ex_threads = []
-    file_name = exp_config['experiment']['result']+"/"+exp_config['experiment']['name']+"-"+str(user_num)
+    path = exp_config['experiment']['result']
+    if not os.path.exists(path):
+        os.makedirs(path)
+    file_name = path +"/"+exp_config['experiment']['name']+"-"+str(user_num)
     request_url, params = analyze(exp_config)
     # 请求时间
     request_time = exp_config['experiment']['user']['time']
     for i in range(user_num):
         flag = random.randint(0, len(request_url)-1)
-        t = MyThread(i, request, (base_urls+request_url[flag]
+        t = MyThread(i, request, (base_urls+ "/" +request_url[flag]
                                   , params[flag][random.randint(0, len(params[flag])-1)], request_time, ))
         ex_threads.append(t)
     for t in ex_threads:  # 循环启动线程
@@ -84,5 +105,3 @@ def user_demands(exp_config, user_num, url):
         with open(file_name, 'a') as f:
             f.writelines(str(t.get_result()) + '\n')
             f.close()
-
-

@@ -49,3 +49,25 @@ kubectl apply -f ./resource/metrics-erver/metrics-server.yaml
 #kubectl delete ./resource/metrics-erver/metrics-server.yaml
 ~~~
 这里通过shell指令获取 某一命名空间下的pod的资源消耗
+
+
+## users
+### 用户请求
+生成数据脚本可以写在productData中， 最后生成的是json的数组，并放到相应的文件中
+~~~json
+[
+  {
+    "urlpath": "user/login", % 接口
+    "needparam" : True,    % 没有填写成为False（python的形式）
+    "param" : [            %请求的参数,json形式， 
+      {
+        "username": "id" ,
+        "password" : "password"
+      }
+
+    ]
+  },{ % 第二个请求的接口信息
+  
+  }
+]
+~~~

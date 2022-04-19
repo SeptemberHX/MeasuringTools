@@ -54,18 +54,16 @@ class K8S:
             dep['spec']['containers'][0]['env'] = envs
             dep['spec']['nodeSelector']['node'] = node_selector_value
             dep['metadata']['name'] = f'{name}-{datetime.now().timestamp()}'
-            dep['spec']['containers'][0]['resources']['limits']['cpu'] = cpu
-            dep['spec']['containers'][0]['resources']['limits']['memory'] = ram
-            dep['spec']['containers'][0]['resources']['requests']['cpu'] = cpu
-            dep['spec']['containers'][0]['resources']['requests']['memory'] = ram
-
+            dep['spec']['containers'][0]['resources']['limits']['cpu'] = str(cpu) + "m"
+            dep['spec']['containers'][0]['resources']['limits']['memory'] = str(ram) + "Mi"
+            dep['spec']['containers'][0]['resources']['requests']['cpu'] = str(cpu) + "m"
+            dep['spec']['containers'][0]['resources']['requests']['memory'] = str(ram) +"Mi"
             print(dep)
 
             if not debug:
                 self.create_namespace_if_not_exist(namespace)
                 result = self.core_api.create_namespaced_pod(body=dep, namespace=namespace)
                 print("------------------")
-                print(result)
             return dep['metadata']['name']
 
     def create_pod_from_config(self, exp_config, cpu, ram):
@@ -91,16 +89,21 @@ class K8S:
                                        namespace, cpu=cpu, ram=ram, debug=exp_config['debug'])
 
 
-    def get_pod_ip(self, pod_name, namespace):
+    def get_pod_ip(self, pod_name, namespace="default"):
         ret = self.core_api.read_namespaced_pod(name=pod_name, namespace=namespace)
         return ret.status.pod_ip
 
+    def get_pod_docker_id(self, pod_name, namespace="default"):
+        ret = self.core_api.read_namespaced_pod(name=pod_name, namespace=namespace)
+        return str(ret.status.container_statuses[0].container_id).split("//")[1]
+
 
 if __name__ == '__main__':
-    with open("resource/demo/basicuser/config-template-demo.yaml") as f:
+    with open("resource/demo/config-template-demo.yaml") as f:
         exp_config = yaml.safe_load(f)
         k8scontroller = K8S()
         k8scontroller.create_pod_from_config(exp_config, 100, 500)
+        print(k8scontroller.get_pod_docker_id("basicuser-1650366496.760966"))
 
 
 

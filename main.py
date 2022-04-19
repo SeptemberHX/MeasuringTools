@@ -12,11 +12,10 @@
 import yaml
 from k8s import K8S
 
-
+from metrics import detectCpuAndMemByPodId
 from users import user_demands
 import multiprocessing
-from metrics import detectCpuAndMemById
-from metrics import detectCpuAndMemByPodId
+
 import time
 
 def process_fix_resource(exp_config, cpu, ram):
@@ -40,10 +39,10 @@ def process_fix_resource(exp_config, cpu, ram):
     for user_num in range(exp_config['experiment']['user']['start'],
                      exp_config['experiment']['user']['end'],
                      exp_config['experiment']['user']['step']):
-        user_demands(exp_config, user_num, url+':8080')
+        user_demands(exp_config, user_num, str(url)+':8080')
 
-    time.sleep(20)
 
+    print("end monitor")
     pool.terminate() # 收集 性能线程终止
     pass
 
@@ -67,7 +66,4 @@ def experiment_process(config_file_path):
 
 
 if __name__ == '__main__':
-    # experiment_process('./resource/config-template.yaml')
-    with open('resource/demo/basicuser/config-template-demo.yaml') as f:
-        exp_config = yaml.safe_load(f)
-        process_fix_resource(exp_config, 100, 500)
+    experiment_process('./resource/demo/config-template-demo.yaml')
