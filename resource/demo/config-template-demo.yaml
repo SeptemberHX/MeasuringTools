@@ -15,11 +15,11 @@ experiment:
     cpu:
       start: 100
       end: 1000
-      step: 100
+      step: 200
     ram:
       start: 200
-      end: 1000
-      step: 100
+      end: 501
+      step: 150
   user:  # 模拟的用户数量
     start: 100
     end: 1000

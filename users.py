@@ -108,3 +108,8 @@ def user_demands(exp_config, user_num, url, pod_id, cpu, ram):
         with open(file_name, 'a') as f:
             f.writelines(str(t.get_result()) + '\n')
             f.close()
+
+
+if __name__ == '__main__':
+    for i in range(100, 1000, 100):
+        print(i)
