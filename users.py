@@ -82,13 +82,15 @@ def analyze(exp_config):
             params.append(param)
     return request_url, params
 
-def user_demands(exp_config, user_num, url, pod_id):
+
+def user_demands(exp_config, user_num, url, pod_id, cpu, ram):
+    print("begin user command with cpu-" + str(cpu)+" and ram-" + str(ram) +"and usernum-"+str(user_num))
     base_urls = "http://" + url
     ex_threads = []
-    path = exp_config['experiment']['result'] + "/" + pod_id
+    path = exp_config['experiment']['result'] + "/" + exp_config['experiment']['name'] + "/" + str(pod_id)
     if not os.path.exists(path):
         os.makedirs(path)
-    file_name = path +"/"+exp_config['experiment']['name']+"-"+str(user_num)
+    file_name = path +"/cpu-" + str(cpu)+"-ram-" + str(ram) +"-usernum-"+str(user_num)
     request_url, params = analyze(exp_config)
     # 请求时间
     request_time = exp_config['experiment']['user']['time']
@@ -101,6 +103,7 @@ def user_demands(exp_config, user_num, url, pod_id):
         t.start()
     for t in ex_threads:  # 等待线程完成
         t.join()
+    print("end user command with cpu-" + str(cpu)+" and ram-" + str(ram) +"and usernum-"+str(user_num))
     for t in ex_threads:  # 获取结果
         with open(file_name, 'a') as f:
             f.writelines(str(t.get_result()) + '\n')

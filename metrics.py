@@ -17,6 +17,28 @@ import datetime
 import csv
 from k8s import K8S
 
+def judge(pod_id, namespace="default"):
+    judgeP = True
+    while judgeP:
+        try:
+            res = os.popen("kubectl top pods -n " + str(namespace) + " " + str(pod_id)).readlines()
+            h = re.sub(' +', " ", res[1].strip('\n'))
+            result = h.split(" ")
+            cpu = int(str(result[1]).replace("m", ""))
+            if cpu < 15:
+                print("cpu stable and now is : " + str(cpu))
+                judgeP = False
+            else:
+                print("now time cpu :" + str(cpu))
+                time.sleep(15)
+        except Exception as e:
+            print(e)
+            print("no pod named: " + str(pod_id) +"   and sleep 15")
+            time.sleep(15)
+            continue
+
+
+
 def detectCpuAndMemById(exp_config, pod_id):
     print("pod_id :" + str(pod_id))
     namespace = exp_config['experiment']['namespace']
@@ -50,7 +72,6 @@ def detectCpuAndMemByPodId(exp_config, pod_id):
         writer = csv.writer(f)
         writer.writerow(["date", "cpu/m", "mem", 'memlimit'])
         f.close()
-    print("wirte")
     docker_container_id = k8scon.get_pod_docker_id(pod_id)
     print("docker contrainer id: " + docker_container_id)
     while True:
