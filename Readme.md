@@ -51,26 +51,33 @@ kubectl apply -f ./resource/metrics-erver/metrics-server.yaml
 这里通过shell指令获取 某一命名空间下的pod的资源消耗
 
 
-## users
-### 用户请求
-生成数据脚本可以写在productData中， 最后生成的是json的数组，并放到相应的文件中
-user中的analyze方法是解析请求的方法，
-~~~json
-[
-  {
-    "urlpath": "user/login", % 接口
-    "needparam" : True,    % 没有填写成为False（python的形式）
-    "param" : [            %请求的参数,json形式， 
-      {
-        "username": "id" ,
-        "password" : "password"
-      }
-
-    ]
-  },{ % 第二个请求的接口信息
-    "urlpath": "user/get", % 接口
-    "needparam" : False,    % 没有参数的话，analyze会生成20个空参json，以用来请求
-  
-  }
-]
-~~~
+## 使用说明
+1. 两个配置文件
+    1. config-template.yaml， 详细的配置参照`resource/demo/config-template-demo.yaml`文件
+    2. 请求信息配置文件，参照`requestBody/basicuser`（形式如下），
+        ~~~json
+        [
+          {
+            "urlpath": "user/login", % 接口
+            "needparam" : True,    % 没有填写成为False（python的形式）
+            "param" : [            %请求的参数,json形式， 
+              {
+                "username": "id" ,
+                "password" : "password"
+              }
+        
+            ]
+          },{ % 第二个请求的接口信息
+            "urlpath": "user/get", % 接口
+            "needparam" : False,    % 没有参数的话，analyze会生成20个空参json，以用来请求
+          
+          }
+        ]
+        ~~~
+       生成脚本可以写在productData中， 最后生成的是json的数组，并放到文件中，通过user中的analyze方法解析
+ 
+ ## 使用方法
+ 
+ 1. 配置好两个配置文件，保证pod部署在master节点上（参考demo文件）
+ 2. 保证自己有k8s集群的操作权限,若是没有，在`k8s/K8S`类的初始化类中，更改config的load方式
+ 3. 将ExpTool文件夹 移动到102 并执行 `python3 main.py` 运行时间较长 可以考虑nohup

@@ -17,8 +17,9 @@ from kubernetes import client, config
 
 
 class K8S:
-    def __init__(self):
+    def __init__(self, configpath= "/home/liulei/.kube/config"):
         config.load_kube_config()
+        # config.load_kube_config(config_file=configpath)
         self.core_api = client.CoreV1Api() # namespace,pod,service,pv,pvc
         self.apps_api = client.AppsV1Api() # deployment
 
