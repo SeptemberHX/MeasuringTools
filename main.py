@@ -10,7 +10,7 @@
 """
 
 import yaml
-from k8s import K8S
+from basicinfo import basicconfig
 
 from metrics import detectCpuAndMemByPodId
 from users import user_demands
@@ -71,4 +71,4 @@ def experiment_process(config_file_path):
 
 
 if __name__ == '__main__':
-    experiment_process('./resource/demo/config-template-demo.yaml')
+    experiment_process(basicconfig)

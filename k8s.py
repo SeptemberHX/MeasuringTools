@@ -11,6 +11,7 @@
 
 from datetime import datetime
 from typing import Dict
+from basicinfo import basicpod
 
 import yaml
 from kubernetes import client, config
@@ -48,7 +49,7 @@ class K8S:
                 :param c: k8s api client object
                 :return: pod id
                 '''
-        with open('./resource/pod.yaml') as f:
+        with open(basicpod) as f:
             dep = yaml.safe_load(f)
             dep['spec']['containers'][0]['name'] = name
             dep['spec']['containers'][0]['image'] = image
