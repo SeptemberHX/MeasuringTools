@@ -3,13 +3,11 @@
 
 """
 @Project ：ExpTool 
-@File ：main.py
+@File ：metrics.py
 @Author Lei
 @Date ：2022/4/05
 @Description: 资源获取
 """
-
-import multiprocessing
 import time
 import os
 import re

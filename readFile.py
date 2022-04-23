@@ -1,3 +1,14 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+
+"""
+@Project ：ExpTool
+@File ：readFile.py
+@Author Lei
+@Date ：2022/4/05
+@Description: 读取文件
+"""
+
 import yaml
 import os
 from basicinfo import basicconfig
@@ -20,7 +31,7 @@ def TimeByDateTIme(date):
     return date.timestamp()
 
 
-def getServiceData(serviceName):
+def getServiceData():
     f = open(basicconfig, 'r')
     exp_config = yaml.safe_load(f)  # 配置文件
     dir_performance = exp_config['experiment']['performance-data'] + str(exp_config['service']['name']) + "/"
@@ -31,6 +42,7 @@ def getServiceData(serviceName):
             pod_id = performance_file.replace(".csv", "")
             dir_result = exp_config['experiment']['result'] + "/" + exp_config['experiment']['name'] + "/" + str(pod_id)
             allnfo.append(getPodInfo(pod_id, dir_performance, dir_result))
+    return allnfo
 
 
 def getPodInfo(pod_id, dir_performance, dir_result):
@@ -73,8 +85,7 @@ def getPodInfo(pod_id, dir_performance, dir_result):
 
 
 def getResultByPodAndUserNum(filename):
-    result = {'userNum': int(filename.split("-")[5]),
-              'requests': 0,  # 总请求量
+    result = {'requests': 0,  # 总请求量
               'rpt': 0.0,  # 平均响应时间
               'success_rate': 0.0}  # 成功率
     requests = 0
@@ -93,10 +104,9 @@ def getResultByPodAndUserNum(filename):
                     success += 1
         f.close()
     result['requests'] = requests
-    result['rpt'] = round(rpt / success, 4)
     result['success_rate'] = round(success/requests, 4)
+    if not success == 0:
+        result['rpt'] = round(rpt / success, 4)
+    else:
+        result['rpt'] = -1
     return result
-
-
-if __name__ == '__main__':
-    serviceData = getServiceData("basicuser")
