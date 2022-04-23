@@ -42,7 +42,7 @@ def request(urls, request_body, request_time):
             end = time.time()
             if r.status_code != 200:
                 status = 'fail'
-        result.append((start, time.time(),status))
+        result.append((start, time.time(), status))
         time.sleep(1)
         end_time = time.time()
         if (end_time - begin_time) > request_time:

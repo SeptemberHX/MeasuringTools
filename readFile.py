@@ -4,16 +4,21 @@ from basicinfo import basicconfig
 import csv
 import datetime
 import time
+import re
+
 
 # 获取time类型
 def getDateTimeByTimeFloat(time_float):
     return datetime.datetime.fromtimestamp(time_float)
 
+
 def getDateTimeBystr(strs):
     return datetime.datetime.strptime(strs, "%Y-%m-%d %H:%M:%S.%f")
 
+
 def TimeByDateTIme(date):
     return date.timestamp()
+
 
 def getServiceData(serviceName):
     f = open(basicconfig, 'r')
@@ -34,7 +39,7 @@ def getPodInfo(pod_id, dir_performance, dir_result):
         'cpu_limit': 0,
         'ram_limit': 0,
         'performanceData': [],
-        'result':{}
+        'result': {}
     }
     performanceData = []
     with open(dir_performance + pod_id + ".csv") as f:
@@ -42,9 +47,9 @@ def getPodInfo(pod_id, dir_performance, dir_result):
         next(reader)
         for row in reader:
             performanceData.append({
-                "date" : getDateTimeBystr(row[0]),
-                "cpu" : float(row[1]),
-                "mem" : float(str(row[2]).replace("MiB", "").replace("B","").replace("K",""))
+                "date": getDateTimeBystr(row[0]),
+                "cpu": float(row[1]),
+                "mem": float(str(row[2]).replace("MiB", "").replace("B", "").replace("K", ""))
             })
         f.close()
     pod_json['performanceData'] = performanceData
@@ -57,25 +62,41 @@ def getPodInfo(pod_id, dir_performance, dir_result):
     pod_json['cpu_limit'] = cpu
     pod_json['ram_limit'] = mem
 
-
     ## readResult
     result = {}
     for result_file in result_files:
         if not os.path.isdir(result_file):
             userNum = int(result_file.split("-")[5])
-            result[str(userNum)] = getResultByPodAndUserNum(dir_result+"/" + result_file)
+            result[str(userNum)] = getResultByPodAndUserNum(dir_result + "/" + result_file)
     pod_json['result'] = result
     return pod_json
 
 
 def getResultByPodAndUserNum(filename):
-    result = {} # list或者 json 自己看一下
-
+    result = {'userNum': int(filename.split("-")[5]),
+              'requests': 0,  # 总请求量
+              'rpt': 0.0,  # 平均响应时间
+              'success_rate': 0.0}  # 成功率
+    requests = 0
+    success = 0
+    rpt = 0.0
+    pattern = re.compile('\([^\(\)]*\'\)')
     with open(filename) as f:
-        # TODO : 返回读取结果 @wangteng
-
+        lines = f.readlines()
+        for line in lines:
+            data = pattern.findall(line)
+            requests += len(data)
+            for r in data:
+                tmp = r.replace('(', '').replace(')', '').split(', ')
+                if tmp[2] == "'success'":
+                    rpt += (float(tmp[1])-float(tmp[0]))
+                    success += 1
         f.close()
+    result['requests'] = requests
+    result['rpt'] = round(rpt / success, 4)
+    result['success_rate'] = round(success/requests, 4)
     return result
+
 
 if __name__ == '__main__':
     serviceData = getServiceData("basicuser")
