@@ -1,4 +1,6 @@
-#!/usr/bin/env python
+
+
+
 
 
 import random
@@ -6,7 +8,6 @@ import time, threading, requests, os
 import yaml
 import ast
 
-# todo: 根据pod的访问路径调整ip
 base_urls = "http://127.0.0.1"
 
 
@@ -27,28 +28,24 @@ class MyThread(threading.Thread):
             return None
 
 
-def request(urls, request_body, request_time):
-    begin_time = time.time()
-    result = []
-    while True:
+def request_one(urls, request_body):
+    status = 'success'
+    try:
         start = time.time()
-        status = 'success'
-        try:
-            r = requests.post(urls, json=request_body)
-        except Exception as e:
-            end = time.time()
+        r = requests.post(urls, json=request_body)
+    except Exception as e:
+        end = time.time()
+        status = 'fail'
+    else:
+        end = time.time()
+        if r.status_code != 200:
             status = 'fail'
-        else:
-            end = time.time()
-            if r.status_code != 200:
-                status = 'fail'
-        result.append((start, time.time(), status))
-        time.sleep(1)
-        end_time = time.time()
-        if (end_time - begin_time) > request_time:
-            break
-    return threading.currentThread().user_id, result
-
+    jsonData = {
+        "start" : start,
+        "end" : end,
+        "status" : status
+    }
+    return jsonData
 
 
 def analyze(exp_config):
@@ -70,28 +67,26 @@ def analyze(exp_config):
     return request_url, params
 
 
-def user_demands(exp_config, user_num, url, pod_id, cpu, ram):
-    print("begin user command with cpu-" + str(cpu)+" and ram-" + str(ram) +"and usernum-"+str(user_num))
+def user_demands_one(exp_config, user_num, url):
     base_urls = "http://" + url
     ex_threads = []
-    path = exp_config['experiment']['result'] + "/" + exp_config['experiment']['name'] + "/" + str(pod_id)
-    if not os.path.exists(path):
-        os.makedirs(path)
-    file_name = path +"/cpu-" + str(cpu)+"-ram-" + str(ram) +"-usernum-"+str(user_num)
     request_url, params = analyze(exp_config)
     # 请求时间
-    request_time = exp_config['experiment']['user']['time']
     for i in range(user_num):
         flag = random.randint(0, len(request_url)-1)
-        t = MyThread(i, request, (base_urls+ "/" +request_url[flag]
-                                  , params[flag][random.randint(0, len(params[flag])-1)], request_time, ))
+        t = MyThread(i, request_one, (base_urls+ "/" +request_url[flag]
+                                  , params[flag][random.randint(0, len(params[flag])-1)], ))
         ex_threads.append(t)
     for t in ex_threads:  # 循环启动线程
         t.start()
     for t in ex_threads:  # 等待线程完成
         t.join()
-    print("end user command with cpu-" + str(cpu)+" and ram-" + str(ram) +"and usernum-"+str(user_num))
+
+    list = []
     for t in ex_threads:  # 获取结果
-        with open(file_name, 'a') as f:
-            f.writelines(str(t.get_result()) + '\n')
-            f.close()
+        list.append(t.get_result())
+    return list
+
+
+
+

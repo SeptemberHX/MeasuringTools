@@ -4,7 +4,7 @@ import random
 
 # 生成数据的一个小脚本
 
-def product():
+def productUserData():
     dataList = []
     # add 接口
     addJson = {
@@ -74,29 +74,36 @@ def product():
     return dataList
 
 
-def analyze(exp_config):
-    request_url = []
-    params = []
-    filepath = exp_config['experiment']['data']
-    f = open(filepath, 'r')
-    data = ast.literal_eval(f.read())
-    for eachJson in data:
-        request_url.append(eachJson['urlpath'])
-        if eachJson['needparam']:
-            param = eachJson['param']
-            params.append(param)
-        else:
-            param = []
-            for i in range(10):
-                param.append({})
-            params.append(param)
-    return request_url, params
+
+def productNotificationData():
+    dataList = []
+    # add 接口
+    addJson = {
+        "urlpath": "user/login",
+        "needparam": True,
+        "param": []
+    }
+    param = []
+    for i in range(10):
+        param.append({
+            "userid": i,
+            "name": "testuser" + str(i),
+            "birthday": " 2022-01-01-01",
+            "email": "microserivce_userName" + str(i) + "@163.com",
+            "sex" : random.randint(0, 2),
+            "phone": "121231233" + str(i),
+            "type" : random.randint(0, 4),
+            "password" : "testuser" + str(i)
+        })
+    addJson['param'] = param
+    dataList.append()
+
 
 
 
 if __name__ == '__main__':
     filename = 'basicuser'
-    dataList = product()
+    dataList = productUserData()
     with open(filename, 'w') as f:
         f.write(str(dataList))
         f.close()
