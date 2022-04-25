@@ -58,7 +58,7 @@ class K8S:
             dep['metadata']['name'] = f'{name}-{datetime.now().timestamp()}'
             dep['spec']['containers'][0]['resources']['limits']['cpu'] = str(cpu) + "m"
             dep['spec']['containers'][0]['resources']['limits']['memory'] = str(ram) + "Mi"
-            dep['spec']['containers'][0]['resources']['requests']['cpu'] = str(cpu/10) + "m"
+            dep['spec']['containers'][0]['resources']['requests']['cpu'] = str(cpu) + "m"
             dep['spec']['containers'][0]['resources']['requests']['memory'] = str(ram/10) +"Mi"
 
             print(dep)
@@ -107,9 +107,10 @@ class K8S:
 if __name__ == '__main__':
     with open("resource/demo/config-template-demo.yaml") as f:
         exp_config = yaml.safe_load(f)
-        k8scontroller = K8S()
-        # k8scontroller.create_pod_from_config(exp_config, 100, 500)
-        k8scontroller.delete_pod("basicuser-1650376338.320011")
+        print(exp_config['experiment']['data'])
+        # k8scontroller = K8S()
+        # # k8scontroller.create_pod_from_config(exp_config, 100, 500)
+        # k8scontroller.delete_pod("basicuser-1650376338.320011")
 
 
 

@@ -68,6 +68,7 @@ def experiment_process(config_file_path):
                              exp_config['experiment']['resource']['ram']['end'],
                              exp_config['experiment']['resource']['ram']['step']):
                 process_fix_resource(exp_config, cpu, ram)
+        # process_fix_resource(exp_config, 2000, 500)
 
 
 if __name__ == '__main__':

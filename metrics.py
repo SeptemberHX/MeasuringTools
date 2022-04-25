@@ -23,7 +23,7 @@ def judge(pod_id, namespace="default"):
             h = re.sub(' +', " ", res[1].strip('\n'))
             result = h.split(" ")
             cpu = int(str(result[1]).replace("m", ""))
-            if cpu < 15:
+            if cpu < 20:
                 print("cpu stable and now is : " + str(cpu))
                 judgeP = False
             else:
@@ -40,7 +40,7 @@ def judge(pod_id, namespace="default"):
 def detectCpuAndMemById(exp_config, pod_id):
     print("pod_id :" + str(pod_id))
     namespace = exp_config['experiment']['namespace']
-    path =  exp_config['experiment']['performance-data'] + str(exp_config['service']['name'])
+    path = exp_config['experiment']['performance-data'] +"/" + exp_config['experiment']['name']
     filename = path + "/" + str(pod_id) + ".csv"
     if not os.path.exists(path):
         os.makedirs(path)
@@ -61,7 +61,7 @@ def detectCpuAndMemById(exp_config, pod_id):
 
 def detectCpuAndMemByPodId(exp_config, pod_id):
     k8scon = K8S()
-    path = exp_config['experiment']['performance-data'] + str(exp_config['service']['name'])
+    path = exp_config['experiment']['performance-data'] +"/" + exp_config['experiment']['name']
     filename = path + "/" + str(pod_id) + ".csv"
     if not os.path.exists(path):
         os.makedirs(path)
