@@ -11,6 +11,7 @@
 import yaml
 import os
 from basicinfo import basicconfig
+from basicinfo import basicconfig2
 import csv
 import datetime
 import json
@@ -172,20 +173,32 @@ def getResultByPodAndUserNum(filename, standardTime):
     return result, standardTime
 
 
-
-def getTestServiceData():
-    f = open(basicconfig, 'r')
-    exp_config = yaml.safe_load(f)  # 配置文件
+# main
+def getOneTimeRequestServiceData(exp_config):
     dir_result = exp_config['experiment']['result'] + "/" + exp_config['experiment']['name']
+    dir_performance = exp_config['experiment']['performance-data'] +"/" + exp_config['experiment']['name'] +"/"
     results_file = os.listdir(dir_result)
     allData = []
     for result_file in results_file:
         podData = {
-            'podId' : ""
-            'cpuLim'
+            'podId' : "",
         }
         names = str(result_file).split("-")
         podData['pod_id'] = names[0] + "-" + names[1]
+
+        performanceData = []
+        with open(dir_performance + names[0] + "-" + names[1] + ".csv") as f:
+            reader = csv.reader(f)
+            next(reader)
+            for row in reader:
+                performanceData.append({
+                    "date": getDateTimeBystr(row[0]),
+                    "cpu": float(row[1]),
+                    "mem": float(str(row[2]).replace("MiB", "").replace("B", "").replace("K", ""))
+                })
+            f.close()
+
+
         podData['cpuLimit'] = int(names[3])
         podData['memLimit'] = int(names[5])
         podData['res'] = {}
@@ -201,6 +214,7 @@ def getTestServiceData():
             maxRes = 0
             avgRes = 0
             over_one_second_num = 0
+            startTime = 0.0
             for data in jsondata[i]:
                 if data['status'] == "success":
                     responseTime = float(data['end'])-float(data['start'])
@@ -210,18 +224,36 @@ def getTestServiceData():
                 else:
                     res['allSuccess'] = False
                     break
+                if startTime == 0.0:
+                    startTime = float(data['start'])
+                else:
+                    startTime = startTime if startTime > float(data['start']) else float(data['start'])
+            responseTimeInOneSecond = 0
+            for data in jsondata[i]:
+                if data['status'] == "success":
+                    if float(data['end']) - startTime < 1:
+                        responseTimeInOneSecond +=1
+            res['OneSecondTime'] = responseTimeInOneSecond
             res['maxRes'] = maxRes
             res['avgRes'] = round(avgRes / userNum, 4)
             res['over_one_second_num'] = over_one_second_num
             podData['res'][i] = res
+
+
+            startTime = getDateTimeByTimeFloat(startTime)
+            for j in range(1, len(performanceData)):
+                if beforeTime(performanceData[j-1]['date'] , startTime) and beforeTime(performanceData[j]['date'], startTime):
+                    res['avgCpu'] = round((performanceData[j-1]['cpu'] + performanceData[j]['cpu']) / 2 , 4)
+                    break
         allData.append(podData)
     return allData
 
 
 if __name__ == '__main__':
-    allData = getTestServiceData()
+    allData = getOneTimeRequestServiceData( yaml.safe_load(open(basicconfig2, 'r')))
     for i in allData:
-        print(json.dumps(i, indent=2))
+        if i['cpuLimit'] == 600:
+            print(json.dumps(i, indent=2))
     # serviceDatas = getServiceData()
     # for i in serviceDatas:
     #     if i['ram_limit'] == 400:
